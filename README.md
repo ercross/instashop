@@ -20,6 +20,8 @@ as specified by the assessment instructions.
 - **Framework**: chi for routing
 - **Authentication**: JWT for session management
 - **Database**: PostgreSQL
+- **GORM**: Since the assessment instruction didn't specify a data access preference (SQL queries / ORM ),
+            an ORM (GORM) was used because it is more ideal for the project purpose
 - **Documentation**: Swagger for endpoint documentation
 
 ## Endpoints
@@ -68,7 +70,6 @@ For production readiness, the following improvements are recommended:
 
 - **Enhanced Security**: Add rate limiting, CORS, HTTP/1.1 security headers, stricter input validation, and secure JWT handling.
 - **Role-based Access Control**: Implement a more robust access control system to handle different user roles more flexibly.
-- **Improved Error Handling**: Include more specific error messages.
 - **Logging**: Implement logging to improve error-tracing, debugging and troubleshooting
 
 ## License
