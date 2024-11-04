@@ -2,44 +2,44 @@ package v1
 
 import "net/http"
 
-func login() http.HandlerFunc {
+func login(repo *Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }
-func register() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
-}
-
-func getAllProducts() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
-}
-func getProductByID() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
-}
-func createProduct() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
-}
-func updateProduct() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
-}
-func updateOrderStatus() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
-}
-func deleteProduct() http.HandlerFunc {
+func register(repo *Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }
 
-func getOrders() http.HandlerFunc {
+func getAllProducts(repo *Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {}
+}
+func getProductByID(repo *Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {}
+}
+func createProduct(repo *Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {}
+}
+func updateProduct(repo *Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {}
+}
+func updateOrderStatus(repo *Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {}
+}
+func deleteProduct(repo *Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }
 
-func getOrderByID() http.HandlerFunc {
+func getOrders(repo *Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }
 
-func cancelOrder() http.HandlerFunc {
+func getOrderByID(repo *Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }
 
-func createOrder() http.HandlerFunc {
+func cancelOrder(repo *Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {}
+}
+
+func createOrder(repo *Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }

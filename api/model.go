@@ -2,6 +2,20 @@ package api
 
 import "time"
 
+type OrderStatus int8
+
+const (
+	OrderStatusUnknown OrderStatus = iota
+	OrderStatusPending
+	OrderStatusConfirmed
+	OrderStatusShipped
+	OrderStatusDelivered
+	OrderStatusCanceled
+	OrderStatusReturned
+	OrderStatusRefunded
+	OrderStatusFailed
+)
+
 // User represents a user in the e-commerce system.
 type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey;autoIncrement"`
@@ -25,12 +39,12 @@ type Product struct {
 
 // Order represents an order placed by a user.
 type Order struct {
-	ID        uint      `json:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    uint      `json:"user_id" gorm:"not null"`
-	Status    string    `json:"status" gorm:"not null" sql:"type:varchar(50);default:'Pending'"`
-	Total     float64   `json:"total" gorm:"not null"`
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	ID        uint        `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserID    uint        `json:"user_id" gorm:"not null"`
+	Status    OrderStatus `json:"status" gorm:"not null" sql:"type:int;default:1"`
+	Total     float64     `json:"total" gorm:"not null"`
+	CreatedAt time.Time   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time   `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
 // OrderItem represents the items within an order, linking products to orders.

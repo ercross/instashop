@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func addRoutes() {
+func addRoutes(repo *Repository) {
 
 }
 
