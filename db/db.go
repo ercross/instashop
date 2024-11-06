@@ -3,7 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
-	"instashop/api"
+	"instashop/api/model"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
@@ -20,7 +20,7 @@ func NewDB(dsn string) (*DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&api.User{}, &api.Product{}, &api.Order{}, &api.OrderItem{})
+	err = db.AutoMigrate(&model.User{}, &model.Product{}, &model.Order{}, &model.OrderItem{})
 	if err != nil {
 		return nil, err
 	}
@@ -28,12 +28,12 @@ func NewDB(dsn string) (*DB, error) {
 	return &DB{client: db}, nil
 }
 
-func (db *DB) ValidateCredentials(email, password string) (api.User, error) {
-	var user api.User
+func (db *DB) ValidateCredentials(email, password string) (model.User, error) {
+	var user model.User
 	err := db.client.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return user, api.ErrInvalidUserInput
+			return user, model.ErrInvalidUserInput
 		}
 		return user, err
 	}
@@ -51,14 +51,14 @@ func (db *DB) Register(email, password string) (uint, error) {
 		return -1, fmt.Errorf("failed to generate hash from password: %w", err)
 	}
 
-	user := api.User{
+	user := model.User{
 		Email:    email,
 		Password: string(hashedPassword),
 	}
 
 	if err = db.client.Create(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return -1, fmt.Errorf("user already exists: %w", api.ErrInvalidUserInput)
+			return -1, fmt.Errorf("user already exists: %w", model.ErrInvalidUserInput)
 		}
 		return -1, fmt.Errorf("failed to create new user: %w", err)
 	}
@@ -66,8 +66,8 @@ func (db *DB) Register(email, password string) (uint, error) {
 	return user.ID, nil
 }
 
-func (db *DB) FetchAllProducts() ([]api.Product, error) {
-	var products []api.Product
+func (db *DB) FetchAllProducts() ([]model.Product, error) {
+	var products []model.Product
 
 	if err := db.client.Find(&products).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, gorm.ErrEmptySlice) {
@@ -79,40 +79,40 @@ func (db *DB) FetchAllProducts() ([]api.Product, error) {
 	return products, nil
 }
 
-func (db *DB) FetchProductByID(id uint) (api.Product, error) {
-	var product api.Product
+func (db *DB) FetchProductByID(id uint) (model.Product, error) {
+	var product model.Product
 	if err := db.client.First(&product, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return api.Product{}, fmt.Errorf("product not found: %w", api.ErrInvalidUserInput)
+			return model.Product{}, fmt.Errorf("product not found: %w", model.ErrInvalidUserInput)
 		}
 		return product, fmt.Errorf("error fetching products: %w", err)
 	}
 	return product, nil
 }
 
-func (db *DB) CreateProduct(product api.Product) (uint, error) {
+func (db *DB) CreateProduct(product model.Product) (uint, error) {
 	if err := db.client.Create(&product).Error; err != nil {
 		return -1, fmt.Errorf("failed to create product: %w", err)
 	}
 	return product.ID, nil
 }
 
-func (db *DB) UpdateProduct(product api.Product) error {
+func (db *DB) UpdateProduct(product model.Product) error {
 	if err := db.client.Save(&product).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("product not found: %w", api.ErrInvalidUserInput)
+			return fmt.Errorf("product not found: %w", model.ErrInvalidUserInput)
 		}
 		return fmt.Errorf("failed to update product: %w", err)
 	}
 	return nil
 }
 
-func (db *DB) UpdateOrderStatus(status api.OrderStatus, orderID uint) error {
-	var order api.Order
+func (db *DB) UpdateOrderStatus(status model.OrderStatus, orderID uint) error {
+	var order model.Order
 	err := db.client.Model(&order).Where("id = ?", orderID).Update("status", status).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("order does not exist: %w", api.ErrInvalidUserInput)
+			return fmt.Errorf("order does not exist: %w", model.ErrInvalidUserInput)
 		}
 		return fmt.Errorf("failed to update order: %w", err)
 	}
@@ -120,9 +120,9 @@ func (db *DB) UpdateOrderStatus(status api.OrderStatus, orderID uint) error {
 }
 
 func (db *DB) DeleteProduct(id uint) error {
-	if err := db.client.Delete(&api.Product{}, id).Error; err != nil {
+	if err := db.client.Delete(&model.Product{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("product not found: %w", api.ErrInvalidUserInput)
+			return fmt.Errorf("product not found: %w", model.ErrInvalidUserInput)
 		}
 		return fmt.Errorf("failed to delete product: %w", err)
 	}
@@ -130,8 +130,8 @@ func (db *DB) DeleteProduct(id uint) error {
 	return nil
 }
 
-func (db *DB) FetchUserOrders(userID uint) ([]api.Order, error) {
-	var orders []api.Order
+func (db *DB) FetchUserOrders(userID uint) ([]model.Order, error) {
+	var orders []model.Order
 	if err := db.client.Where("user_id = ?", userID).Find(&orders).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, gorm.ErrEmptySlice) {
 			return orders, nil
@@ -142,11 +142,11 @@ func (db *DB) FetchUserOrders(userID uint) ([]api.Order, error) {
 }
 
 // FetchOrderByID retrieves a single order by its ID
-func (db *DB) FetchOrderByID(id uint) (api.Order, error) {
-	var order api.Order
+func (db *DB) FetchOrderByID(id uint) (model.Order, error) {
+	var order model.Order
 	if err := db.client.First(&order, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return api.Order{}, fmt.Errorf("order not found: %w", api.ErrInvalidUserInput)
+			return model.Order{}, fmt.Errorf("order not found: %w", model.ErrInvalidUserInput)
 		}
 		return order, fmt.Errorf("error fetching order: %w", err)
 	}
@@ -154,20 +154,20 @@ func (db *DB) FetchOrderByID(id uint) (api.Order, error) {
 }
 
 func (db *DB) CancelOrder(id uint) error {
-	var order api.Order
+	var order model.Order
 	if err := db.client.First(&order, id).Error; err != nil {
 		return err
 	}
 
-	if order.Status != api.OrderStatusPending {
+	if order.Status != model.OrderStatusPending {
 		return errors.New("only pending orders can be cancelled")
 	}
 
-	order.Status = api.OrderStatusCanceled
+	order.Status = model.OrderStatusCanceled
 	return db.client.Save(&order).Error
 }
 
-func (db *DB) CreateOrder(order api.Order) (uint, error) {
+func (db *DB) CreateOrder(order model.Order) (uint, error) {
 	err := db.client.Create(&order).Error
 	return order.ID, err
 }

@@ -1,6 +1,8 @@
 package v1
 
-import "instashop/api"
+import (
+	"instashop/api/model"
+)
 
 // Repository provides a data storage client to manipulate data on a given database server.
 //
@@ -9,18 +11,18 @@ import "instashop/api"
 // to enable handlers propagate the errors effectively.
 // Errors not wrapped with api.ErrInvalidUserInput will be considered an internal error
 type Repository interface {
-	ValidateCredentials(email, password string) (api.User, error)
+	ValidateCredentials(email, password string) (model.User, error)
 	Register(email, password string) (uint, error)
-	FetchAllProducts() ([]api.Product, error)
-	FetchProductByID(id uint) (api.Product, error)
-	CreateProduct(product api.Product) (id uint, err error)
-	UpdateProduct(product api.Product) error
-	UpdateOrderStatus(status api.OrderStatus, orderID uint) error
+	FetchAllProducts() ([]model.Product, error)
+	FetchProductByID(id uint) (model.Product, error)
+	CreateProduct(product model.Product) (id uint, err error)
+	UpdateProduct(product model.Product) error
+	UpdateOrderStatus(status model.OrderStatus, orderID uint) error
 	DeleteProduct(id uint) error
-	FetchUserOrders(userID uint) ([]api.Order, error)
-	FetchOrderByID(id uint) (api.Order, error)
+	FetchUserOrders(userID uint) ([]model.Order, error)
+	FetchOrderByID(id uint) (model.Order, error)
 
 	// CancelOrder updates the order status to "Cancelled" if the order is in a "Pending" state
 	CancelOrder(id uint) error
-	CreateOrder(order api.Order) (id uint, err error)
+	CreateOrder(order model.Order) (id uint, err error)
 }
