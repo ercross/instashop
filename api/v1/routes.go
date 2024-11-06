@@ -2,44 +2,51 @@ package v1
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"instashop/api"
 	"net/http"
 )
 
-func addRoutes(repo *Repository) {
+func AddRoutes(mux *chi.Mux, repo Repository) {
+	mux.Use(middleware.RequestID)
+	mux.Use(api.AuthMiddleware)
 
+	mux.Mount("/", adminRoutes(repo))
+	mux.Mount("/auth", authenticationRoutes(repo))
+	mux.Mount("/order", orderRoutes(repo))
 }
 
-func authenticationRoutes() http.Handler {
+func authenticationRoutes(repo Repository) http.Handler {
 	r := chi.NewRouter()
-	r.Post("/login", login())
-	r.Post("/register", register())
+	r.Post("/login", login(repo))
+	r.Post("/register", register(repo))
 	return r
 }
 
-func adminRoutes() http.Handler {
+func adminRoutes(repo Repository) http.Handler {
 	r := chi.NewRouter()
 
-	r.Get("/products", getAllProducts())
-	r.Get("/product/{id}", getProductByID())
+	r.Get("/products", getAllProducts(repo))
+	r.Get("/product/{id}", getProductByID(repo))
 
-	r.Post("/product", createProduct())
+	r.Post("/product", createProduct(repo))
 
-	r.Put("/product/", updateProduct())
-	r.Put("/orders", updateOrderStatus())
-	r.Delete("/products", deleteProduct())
+	r.Put("/product/", updateProduct(repo))
+	r.Put("/orders", updateOrderStatus(repo))
+	r.Delete("/products", deleteProduct(repo))
 
 	return r
 }
 
-func orderRoutes() http.Handler {
+func orderRoutes(repo Repository) http.Handler {
 	r := chi.NewRouter()
 
-	r.Get("/orders", getOrders())
-	r.Get("/order/{id}", getOrderByID())
+	r.Get("/", getOrders(repo))
+	r.Get("/{id}", getOrderByID(repo))
 
-	r.Put("/order/cancel", cancelOrder())
+	r.Put("/cancel", cancelOrder(repo))
 
-	r.Post("/orders", createOrder())
+	r.Post("/new", createOrder(repo))
 
 	return r
 }
