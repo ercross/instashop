@@ -8,7 +8,7 @@ import (
 )
 
 func AddRoutes(mux *chi.Mux, repo Repository) {
-	mux.Use(middleware.RequestID)
+	mux.Use(middleware.AllowContentType("application/json"))
 	mux.Use(api.AuthMiddleware)
 
 	mux.Mount("/", adminRoutes(repo))
@@ -25,6 +25,8 @@ func authenticationRoutes(repo Repository) http.Handler {
 
 func adminRoutes(repo Repository) http.Handler {
 	r := chi.NewRouter()
+
+	r.Use(api.AdminOnlyMiddleware)
 
 	r.Get("/products", getAllProducts(repo))
 	r.Get("/product/{id}", getProductByID(repo))
