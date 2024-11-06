@@ -28,7 +28,7 @@ type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey;autoIncrement"`
 	Email     string    `json:"email" gorm:"unique;not null" sql:"type:varchar(100)"`
 	Password  string    `json:"-" gorm:"not null" sql:"type:varchar(255)"`
-	IsAdmin   bool      `json:"is_admin" gorm:"default:false"`
+	IsAdmin   bool      `json:"-" gorm:"default:false"`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }

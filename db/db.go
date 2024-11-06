@@ -24,8 +24,44 @@ func NewDB(dsn string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if err = seedAdminAccount(db); err != nil {
+		return nil, err
+	}
 	return &DB{client: db}, nil
+}
+
+// seedAdminAccount creates an admin account to database if it does not already exist.
+//
+// Note that this is not a recommended approach to seed the database with an admin account
+func seedAdminAccount(db *gorm.DB) error {
+
+	email := "admin@instashop.com"
+	password := "admin123"
+
+	// Check if an admin account already exists
+	var admin model.User
+	if err := db.Where("email = ? AND is_admin = ?", email, true).First(&admin).Error; err == nil {
+
+		return nil // Admin already exists, no need to create
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash admin password: %w", err)
+	}
+
+	newAdmin := model.User{
+		Email:    email,
+		Password: string(bytes),
+		IsAdmin:  true,
+	}
+	if err := db.Create(&newAdmin).Error; err != nil {
+		return fmt.Errorf("failed to create admin account: %w", err)
+	}
+
+	return nil
 }
 
 func (db *DB) ValidateCredentials(email, password string) (model.User, error) {
