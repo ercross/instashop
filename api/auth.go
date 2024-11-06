@@ -40,8 +40,6 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 	return nil, errors.New("invalid token")
 }
 
-// AuthMiddleware validates Authorization header tokens and
-// adds user information to request context if token is valid.
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
@@ -57,22 +55,29 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		userID, userOk := claims["user_id"].(float64)
+		isAdmin, adminOk := claims["is_admin"].(bool)
+		if !userOk || !adminOk {
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+			return
+		}
+
+		userIDUint := uint(userID)
+
 		// Add claims to the request context
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, "user_id", claims["user_id"])
-		ctx = context.WithValue(ctx, "is_admin", claims["is_admin"])
+		ctx := context.WithValue(r.Context(), "user_id", userIDUint)
+		ctx = context.WithValue(ctx, "is_admin", isAdmin)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})
 }
 
-// AdminOnlyMiddleware checks if the user has admin privileges.
 func AdminOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		isAdmin, ok := r.Context().Value("is_admin").(bool)
 		if !ok || !isAdmin {
-			http.Error(w, "Admin privileges required", http.StatusForbidden)
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 		next.ServeHTTP(w, r)
