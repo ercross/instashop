@@ -9,7 +9,7 @@ import "instashop/api"
 // to enable handlers propagate the errors effectively.
 // Errors not wrapped with api.ErrInvalidUserInput will be considered an internal error
 type Repository interface {
-	Login(email, password string) error
+	ValidateCredentials(email, password string) (api.User, error)
 	Register(email, password string) (uint, error)
 	FetchAllProducts() ([]api.Product, error)
 	FetchProductByID(id uint) (api.Product, error)
