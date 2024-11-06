@@ -28,18 +28,21 @@ func NewDB(dsn string) (*DB, error) {
 	return &DB{client: db}, nil
 }
 
-func (db *DB) Login(email, password string) error {
+func (db *DB) ValidateCredentials(email, password string) (api.User, error) {
 	var user api.User
 	err := db.client.Where("email = ?", email).First(&user).Error
 	if err != nil {
-		return err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return user, api.ErrInvalidUserInput
+		}
+		return user, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return errors.New("invalid credentials")
+		return user, errors.New("invalid credentials")
 	}
 
-	return nil
+	return user, nil
 }
 
 func (db *DB) Register(email, password string) (uint, error) {
