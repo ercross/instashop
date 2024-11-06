@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
-	"instashop/api"
+	"instashop/api/model"
 	"log"
 	"net/http"
 	"strconv"
@@ -25,7 +25,7 @@ func login(repo Repository) http.HandlerFunc {
 
 		user, err := repo.ValidateCredentials(req.Email, req.Password)
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 				return
 			}
@@ -35,7 +35,7 @@ func login(repo Repository) http.HandlerFunc {
 			return
 		}
 
-		token, err := api.GenerateToken(user.ID, user.IsAdmin)
+		token, err := generateToken(user.ID, user.IsAdmin)
 		if err != nil {
 			log.Printf("Error generating token: %v", err)
 			http.Error(w, "Login failed. Please try again", http.StatusInternalServerError)
@@ -59,7 +59,7 @@ func register(repo Repository) http.HandlerFunc {
 
 		userID, err := repo.Register(req.Email, req.Password)
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, "Email already in use", http.StatusConflict)
 				return
 			}
@@ -95,7 +95,7 @@ func getProductByID(repo Repository) http.HandlerFunc {
 
 		product, err := repo.FetchProductByID(uint(id))
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, "Product not found", http.StatusNotFound)
 				return
 			}
@@ -110,7 +110,7 @@ func getProductByID(repo Repository) http.HandlerFunc {
 
 func createProduct(repo Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var product api.Product
+		var product model.Product
 		if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 			http.Error(w, "Invalid request payload", http.StatusBadRequest)
 			return
@@ -128,7 +128,7 @@ func createProduct(repo Repository) http.HandlerFunc {
 
 func updateProduct(repo Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var product api.Product
+		var product model.Product
 		if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 			http.Error(w, "Invalid request payload", http.StatusBadRequest)
 			return
@@ -136,7 +136,7 @@ func updateProduct(repo Repository) http.HandlerFunc {
 
 		err := repo.UpdateProduct(product)
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, "Invalid product id", http.StatusBadRequest)
 				return
 			}
@@ -152,8 +152,8 @@ func updateProduct(repo Repository) http.HandlerFunc {
 func updateOrderStatus(repo Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			Status api.OrderStatus `json:"status"`
-			ID     uint            `json:"id"`
+			Status model.OrderStatus `json:"status"`
+			ID     uint              `json:"id"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -162,7 +162,7 @@ func updateOrderStatus(repo Repository) http.HandlerFunc {
 
 		err := repo.UpdateOrderStatus(req.Status, req.ID)
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
@@ -186,7 +186,7 @@ func deleteProduct(repo Repository) http.HandlerFunc {
 
 		err = repo.DeleteProduct(uint(id))
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, "Product not found", http.StatusNotFound)
 				return
 			}
@@ -224,7 +224,7 @@ func getOrderByID(repo Repository) http.HandlerFunc {
 
 		order, err := repo.FetchOrderByID(uint(id))
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, "Order not found", http.StatusNotFound)
 				return
 			}
@@ -249,7 +249,7 @@ func cancelOrder(repo Repository) http.HandlerFunc {
 
 		err = repo.CancelOrder(uint(id))
 		if err != nil {
-			if errors.Is(err, api.ErrInvalidUserInput) {
+			if errors.Is(err, model.ErrInvalidUserInput) {
 				http.Error(w, "Order not found", http.StatusBadRequest)
 				return
 			}
@@ -266,7 +266,7 @@ func createOrder(repo Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value("user_id").(uint)
 
-		var order api.Order
+		var order model.Order
 		if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
 			http.Error(w, "Invalid request payload", http.StatusBadRequest)
 			return

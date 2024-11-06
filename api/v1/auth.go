@@ -1,4 +1,4 @@
-package api
+package v1
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 
 var jwtSecret = []byte("not_so_secretive_secret_key")
 
-// GenerateToken creates a JWT token with user-specific claims.
-func GenerateToken(userID uint, isAdmin bool) (string, error) {
+// generateToken creates a JWT token with user-specific claims.
+func generateToken(userID uint, isAdmin bool) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":  userID,
 		"is_admin": isAdmin,
@@ -40,7 +40,7 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 	return nil, errors.New("invalid token")
 }
 
-func AuthMiddleware(next http.Handler) http.Handler {
+func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -73,7 +73,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func AdminOnlyMiddleware(next http.Handler) http.Handler {
+func adminOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		isAdmin, ok := r.Context().Value("is_admin").(bool)
 		if !ok || !isAdmin {
