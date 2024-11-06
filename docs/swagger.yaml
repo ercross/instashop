@@ -1,0 +1,252 @@
+openapi: 3.0.0
+info:
+  title: E-commerce API
+  description: A simple RESTful API for an e-commerce application.
+  version: 1.0.0
+servers:
+  - url: http://localhost:15001
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      description: Register a user with an email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        "201":
+          description: User registered successfully
+        "400":
+          description: Invalid input
+        "409":
+          description: Email already exists
+
+  /auth/login:
+    post:
+      summary: User login
+      description: Login a user and return a JWT token for authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "400":
+          description: Invalid credentials
+
+  /products:
+    get:
+      summary: Get all products
+      description: Retrieve a list of all products (Admin access required).
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Create a product
+      description: Add a new product to the store (Admin access required).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        "201":
+          description: Product created successfully
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized access
+
+  /products/{id}:
+    get:
+      summary: Get product by ID
+      description: Retrieve product details by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "404":
+          description: Product not found
+    put:
+      summary: Update product
+      description: Update product details (Admin access required).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        "200":
+          description: Product updated successfully
+        "400":
+          description: Invalid input
+        "404":
+          description: Product not found
+    delete:
+      summary: Delete product
+      description: Remove a product by its ID (Admin access required).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Product deleted successfully
+        "404":
+          description: Product not found
+
+  /orders:
+    get:
+      summary: Get all orders for a user
+      description: Retrieve all orders for the authenticated user.
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        "401":
+          description: Unauthorized access
+    post:
+      summary: Place an order
+      description: Place a new order for one or more products.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        "201":
+          description: Order placed successfully
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized access
+
+  /orders/{id}:
+    get:
+      summary: Get order by ID
+      description: Retrieve the details of a specific order.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        "404":
+          description: Order not found
+    delete:
+      summary: Cancel an order
+      description: Cancel an order if it is still in the Pending status.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Order canceled successfully
+        "400":
+          description: Cannot cancel order
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        quantity:
+          type: integer
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        status:
+          type: string
+          enum:
+            - Pending
+            - Processing
+            - Shipped
+            - Delivered
+            - Canceled
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
