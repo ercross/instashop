@@ -84,7 +84,7 @@ func (db *DB) ValidateCredentials(email, password string) (model.User, error) {
 func (db *DB) Register(email, password string) (uint, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return -1, fmt.Errorf("failed to generate hash from password: %w", err)
+		return 0, fmt.Errorf("failed to generate hash from password: %w", err)
 	}
 
 	user := model.User{
@@ -94,9 +94,9 @@ func (db *DB) Register(email, password string) (uint, error) {
 
 	if err = db.client.Create(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return -1, fmt.Errorf("user already exists: %w", model.ErrInvalidUserInput)
+			return 0, fmt.Errorf("user already exists: %w", model.ErrInvalidUserInput)
 		}
-		return -1, fmt.Errorf("failed to create new user: %w", err)
+		return 0, fmt.Errorf("failed to create new user: %w", err)
 	}
 
 	return user.ID, nil
@@ -128,7 +128,7 @@ func (db *DB) FetchProductByID(id uint) (model.Product, error) {
 
 func (db *DB) CreateProduct(product model.Product) (uint, error) {
 	if err := db.client.Create(&product).Error; err != nil {
-		return -1, fmt.Errorf("failed to create product: %w", err)
+		return 0, fmt.Errorf("failed to create product: %w", err)
 	}
 	return product.ID, nil
 }
