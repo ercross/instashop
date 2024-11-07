@@ -25,34 +25,19 @@ as specified by the assessment instructions.
 - **Documentation**: Swagger for endpoint documentation
 
 ## Endpoints
-
-The following endpoints are included in the API:
-
-### User Management / Authentication
-- `POST /register`: Register a new user with email and password
-- `POST /login`: Login and receive a JWT for session management
-
-### Product Management (Admin-only access)
-- `POST /products`: Create a new product
-- `GET /products`: Retrieve a list of products
-- `GET /products/{id}`: Retrieve a specific product
-- `PUT /products/{id}`: Update an existing product
-- `DELETE /products/{id}`: Delete a product
-
-### Order Management (Authenticated users)
-- `POST /orders`: Place an order for one or more products
-- `GET /orders`: List all orders for the authenticated user
-- `GET /orders/{id}`: View details of a specific order
-- `PUT /orders/{id}/cancel`: Cancel an order if it is still pending
-- (Admin-only) `PUT /orders/{id}/status`: Update the status of an order
+Find details of the implemented endpoint in [documentation](docs/swagger.yaml)
 
 ## Installation and Deploying
 
 1. **Clone the repository**
    ```bash
    git clone https://github.com/ercross/instashop.git
-   cd ecommerce-api
+   cd instashop
    ```
+2. Find the configuration files (i.e., Dockerfile, compose.yml, and Makefile) 
+   provided to automatically deploy the containerized app locally through docker compose.
+3. Run `make deploy`
+4. Query the app at `localhost:15001` 
 
 ## Project Limitations
 
@@ -71,6 +56,8 @@ For production readiness, the following improvements are recommended:
 - **Enhanced Security**: Add rate limiting, CORS, HTTP/1.1 security headers, stricter input validation, and secure JWT handling.
 - **Role-based Access Control**: Implement a more robust access control system to handle different user roles more flexibly.
 - **Logging**: Implement logging to improve error-tracing, debugging and troubleshooting
+- **Performance**: Implement pagination to increase page load time
+- **Integrated Tests**: implement necessary handler tests to improve stability
 
 ## License
 
